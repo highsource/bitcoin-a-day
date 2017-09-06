@@ -1,7 +1,7 @@
 # Bitcoin A Day
 
 This repository provides scripts to schedule buying €5 worth of bitcoin every day.
-This leverages [Dollar-Cost Averaging (DCA)](http://www.investopedia.com/terms/d/dollarcostaveraging.asp) effect.
+This leverages the [Dollar-Cost Averaging (DCA)](http://www.investopedia.com/terms/d/dollarcostaveraging.asp) effect.
 
 WORK IN PROGRESS
 
@@ -26,16 +26,17 @@ WORK IN PROGRESS
 
 # Usage
 
-Clone this repository:
+* Clone this repository:
 
 ```
 git clone https://github.com/highsource/bitcoin-a-day.git
 ```
 
-*Review the code.* I mean it. You are about to give this code access to your Bitstamp account - via API, but still.
+* **Review the code.** I mean it. You are about to give this code access to your Bitstamp account - via API, but still.  
 Assume I am a malicious actor and wrote this code to steal from you or waste your money for fun. (I did not, but assume so.)
+Check the code, make sure you understand what it does.
 
-Create the `bitstamp-properties.json` file with properties `customerId`, `key` and `secret`
+* Create the `bitstamp-properties.json` file with properties `customerId`, `key` and `secret`:
 
 ```
 {
