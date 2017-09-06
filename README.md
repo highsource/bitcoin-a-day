@@ -12,6 +12,10 @@ WORK IN PROGRESS
 * Bitstamp account
   * Enabled API access
 
+# How it works
+
+TBD
+
 # What it does
 
 * Take `bitstamp-properties.json` as input
@@ -46,7 +50,9 @@ Check the code, make sure you understand what it does.
 }
 ```
 
-* Execute `setup.sh`
+* Execute `setup.sh`.
+
+* Check `output.txt`.
 
 # Credits
 
