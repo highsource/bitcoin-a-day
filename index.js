@@ -87,10 +87,8 @@ const buyLimitOrder = function(customerId, key, secret, value, askPrice) {
 	let order = createAuthData(customerId, key, secret);
 	order.amount = roundedAmount;
 	order.price = askPrice;
-	console.log("Buying " + roundedAmount + " of BTC for price " + askPrice + " for total value of " + (roundedAmount * askPrice) + ".");
 	return new Promise(function(resolve, reject) {
-		console.log("Buying order:");
-		console.log(order);
+		console.log("Buying " + roundedAmount + " of BTC for price " + askPrice + " for total value of " + (roundedAmount * askPrice) + ".");
 		got.post(BUY_LIMIT_ORDER_URL, {
 			body : order,
 			form: true
