@@ -14,7 +14,7 @@ The [license](LICENSE) contains further disclaimers, including but not limited t
 # What it does
 
 The `setup.sh` script creates a scheduled task which buys certain value in Euros worth of Bitcoin every day.
-For instance, you can use it to set up buying €5 of Bitcoin every day.
+For instance, you can use it to set up buying €5 worth of Bitcoin every day.
 
 Scheduled task is created using AWS and runs in the cloud; it will run independent of whether users machine is online or not.
 
