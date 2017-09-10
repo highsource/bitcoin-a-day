@@ -9,9 +9,9 @@ bitcoin_a_day=bitcoin-a-day-"${random_id}"
 rm output.txt
 
 npm install
-chmod 644 index.js
-chmod -R 644 node_modules
-zip -q -r "${bitcoin_a_day}" index.js node_modules 
+chmod 777 index.js
+chmod -R 777 node_modules
+zip -q -r "${bitcoin_a_day}" index.js node_modules package.json
 
 iam_role_name="${bitcoin_a_day}"-lambda
 echo Creating IAM role "${iam_role_name}" for the lambda function.
