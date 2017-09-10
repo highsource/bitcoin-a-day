@@ -1,5 +1,7 @@
-bitstamp-properties.json
-bitstamp-properties.json.encrypted
-bitstamp-properties-access-policy.json
+run-setup.sh
 encryption-key-policy.json
+bitcoin-a-day-*.zip
+bitcoin-a-day-env.json
+targets.json
 output.txt
+node_modules

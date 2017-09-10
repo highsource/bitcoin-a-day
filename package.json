@@ -1,0 +1,13 @@
+{
+	"name" : "bitcoin-a-day",
+	"dependencies": {
+        	"aws-sdk": ">= 2.0.9",
+		"node-uuid": ">= 1.4.1",
+		"got": ">=7.1.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/highsource/bitcoin-a-day.git"
+	},
+	"license" : "Apache-2.0"
+}

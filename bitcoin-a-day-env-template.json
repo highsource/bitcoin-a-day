@@ -1,0 +1,8 @@
+{
+	"Variables": {
+		"BITSTAMP_CUSTOMER_ID":"@encrypted_bitstamp_customer_id@",
+		"BITSTAMP_KEY":"@encrypted_bitstamp_key@",
+		"BITSTAMP_SECRET":"@encrypted_bitstamp_secret@",
+		"VALUE":"@value@"
+	}
+}
