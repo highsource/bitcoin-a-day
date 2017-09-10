@@ -1,25 +1,26 @@
 const AWS = require('aws-sdk');
+const crypto = require('crypto');
+const got = require('got');
+
+const CURRENCY_PAIR = 'btceur';
+const TICKER_URL = 'https://www.bitstamp.net/api/v2/ticker/' + CURRENCY_PAIR + '/';
+const BUY_LIMIT_ORDER_URL = 'https://www.bitstamp.net/api/v2/buy/' + CURRENCY_PAIR + '/';
 
 if (!AWS.config.region) {
 	AWS.config.update({region: 'eu-central-1'});
 }
 
-//const ENCRYPTED_BITSTAMP_CUSTOMER_ID = 'AQICAHg3EDivGcQ+weJzvX4THVnJy/nhoHmMQLPamSDzbtVh5wFlRoiFo/Fc11O+ku7sqKK8AAAAZjBkBgkqhkiG9w0BBwagVzBVAgEAMFAGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMFsa9fkDbOpWM1OHVAgEQgCNLzscYCk4dZD9C0+f38RKOEE3zZb7Lev5fZ1M4Skwps4SEVg==';
-//const ENCRYPTED_BITSTAMP_KEY = 'AQICAHg3EDivGcQ+weJzvX4THVnJy/nhoHmMQLPamSDzbtVh5wEY2ZC267Glz7B9saK3Y6smAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM4BW/1Vf/9Woc+wsRAgEQgDtXo9xyIO1aCOKtNf4DAyviJwTWGoii/0sANeEYkLSxdPQtrkIOTASPfoprPLVTTm0FMV10JTveUR5ozg==';
-//const ENCRYPTED_BITSTAMP_SECRET = 'AQICAHg3EDivGcQ+weJzvX4THVnJy/nhoHmMQLPamSDzbtVh5wGFAoYCI/WyZTMgzb7nTzRHAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMBTvkgfY3L3KU37vWAgEQgDtOAUzcIbVMVoGa5Y6zvQTqBfcCFDzWIfyScUg3ASON0Tgd5KJ2VZ07E+YrUss3BsRcLKBliuABfMQmMw==';
 const ENCRYPTED_BITSTAMP_CUSTOMER_ID = process.env['BITSTAMP_CUSTOMER_ID'];
 const ENCRYPTED_BITSTAMP_KEY = process.env['BITSTAMP_KEY'];
 const ENCRYPTED_BITSTAMP_SECRET = process.env['BITSTAMP_SECRET'];
-//const VALUE = 5;
 const VALUE = Number(process.env['VALUE']);
-
-let BITSTAMP_PROPERTIES;
-
 const MINIMUM_VALUE = 5;
 
 if (isNaN(VALUE) || VALUE < MINIMUM_VALUE) {
 	throw new Error("Invalid value [" + value + "], must be a number not less than [" + MINIMUM_VALUE + "].");
 }
+
+let BITSTAMP_PROPERTIES; 
 
 const kms = new AWS.KMS();
 
@@ -32,8 +33,8 @@ const decrypt = function(encrypted) {
 			.catch(reject)
 	});
 };
-
-const decryptBitstampProperties = new Promise(function(resolve, reject){
+const decryptBitstampProperties = function() {
+	return new Promise(function(resolve, reject){
 	Promise
 	.all([
 		decrypt(ENCRYPTED_BITSTAMP_CUSTOMER_ID),
@@ -44,22 +45,75 @@ const decryptBitstampProperties = new Promise(function(resolve, reject){
 		resolve(BITSTAMP_PROPERTIES);
 	})
 	.catch(reject);
+})};
+
+
+const doWithBitstampProperties = function() {
+	return new Promise(function(resolve, reject){
+		if (BITSTAMP_PROPERTIES) {
+			resolve(BITSTAMP_PROPERTIES);
+		} else {
+			decryptBitstampProperties().then(resolve).catch(reject);
+		}
+	});
+};
+
+const createAuthData = function(customerId, key, secret) {
+	let nonce = (new Date()).getTime();
+	let message = nonce + customerId + key;
+	let signature = crypto.createHmac('sha256', new Buffer(secret, 'utf8')).update(message).digest('hex').toUpperCase();
+	return { key, signature, nonce};
+};
+
+const getAskPrice = new Promise(function(resolve, reject){
+
+		got(TICKER_URL).then(response => {
+			let result = JSON.parse(response.body);
+			let ask = Number(result.ask);
+			if (!isNaN(ask)) {
+				resolve(ask);
+			} else {
+				throw new Error("Could not parse the ask price from [" + BTCEUR_TICKER_URL + "] response:\n" + response.body);
+			}
+		}).catch(reject);
 });
 
-const doWithBitstampProperties = new Promise(function(resolve, reject){
-	if (BITSTAMP_PROPERTIES) {
-		resolve(BITSTAMP_PROPERTIES);
-	} else {
-		decryptBitstampProperties.then(resolve).catch(reject);
-	}
-});
+const buyLimitOrder = function(customerId, key, secret, value, askPrice) {
 
-const doit = function(customerId, key, secret, value) {
-	let message = "Buying " + value + " worth of BTC using customerId " + customerId + ".";
-	console.log(message);
-	return message;
+	let amount = value / askPrice;
+
+	let roundedAmount = Math.ceil(amount * Math.pow(10,5)) / Math.pow(10,5);
+
+	let order = createAuthData(customerId, key, secret);
+	order.amount = roundedAmount;
+	order.price = askPrice;
+	console.log("Buying " + roundedAmount + " of BTC for price " + askPrice + " for total value of " + (roundedAmount * askPrice) + ".");
+	return new Promise(function(resolve, reject) {
+		console.log("Buying order:");
+		console.log(order);
+		got.post(BUY_LIMIT_ORDER_URL, {
+			body : order,
+			form: true
+		}).then(response => {
+			let result = JSON.parse(response.body);
+			resolve(result);
+		}).catch(reject);
+	});
+};
+
+const getAskPriceAndBuyLimitOrder = function(customerId, key, secret, value) {
+	return new Promise(function(resolve, reject) {
+		getAskPrice
+			.then(askPrice => buyLimitOrder(customerId, key, secret, value, askPrice).then(resolve).catch(reject))
+			.catch(reject);
+	});
 };
 
 exports.handler = (event, context, callback) => {
-	doWithBitstampProperties.then(bitstampProperties => callback(null, doit(bitstampProperties.customerId, bitstampProperties.key, bitstampProperties.secret, VALUE)));
+	doWithBitstampProperties()
+		.then(bitstampProperties => 
+			getAskPriceAndBuyLimitOrder(bitstampProperties.customerId, bitstampProperties.key, bitstampProperties.secret, VALUE)
+				.then(result => callback(null, result))
+				.catch(error => callback(error)))
+		.catch(error => callback(error));
 };

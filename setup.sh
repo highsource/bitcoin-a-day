@@ -57,7 +57,7 @@ echo Lambda function ARN: "${lambda_function_arn}" >> output.txt
 
 echo Creating CloudWatch rule to trigger the lambda function.
 trigger_rule_name="${lambda_function_name}"-rule
-trigger_rule_arn=$(aws events put-rule --name "${trigger_rule_name}" --schedule-expression "cron(0/1 * * * ? *)" --query RuleArn --output text)
+trigger_rule_arn=$(aws events put-rule --name "${trigger_rule_name}" --schedule-expression "cron(0 12 * * ? *)" --query RuleArn --output text)
 echo CloudWatch trigger rule name: "${trigger_rule_name}" >> output.txt
 echo CloudWatch trigger rule ARN: "${trigger_rule_arn}" >> output.txt
 trigger_rule_statement_id="${trigger_rule_name}"-event
