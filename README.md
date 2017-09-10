@@ -1,13 +1,22 @@
 # Bitcoin A Day
 
-This repository provides scripts to schedule buying €5 worth of bitcoin every day.
+This repository provides scripts to set up a cloud-scheduled task to buying €X worth of Bitcoin.
 This leverages the [Dollar-Cost Averaging (DCA)](http://www.investopedia.com/terms/d/dollarcostaveraging.asp) effect.
+
+# Disclaimers
+
+This does not constitute any investment advice, neither expressed nor implied.
+
+Trading cryptocurrencies may or may not lead to a total loss, you act on your own risk.
+
+The [license](LICENSE) contains further disclaimers, including but not limited to "Disclaimer of Warranty", "Limitation of Liability", "Accepting Warranty or Additional Liability".
 
 # What it does
 
-The `setup.sh` script creates a scheduled task which buys certain value in Euros worth of bitcoin every day.
+The `setup.sh` script creates a scheduled task which buys certain value in Euros worth of Bitcoin every day.
+For instance, you can use it to set up buying €5 of Bitcoin every day.
 
-Scheduled task is created using AWS and runs in the cloud so that it will run independent of whether users machine is online or not.
+Scheduled task is created using AWS and runs in the cloud; it will run independent of whether users machine is online or not.
 
 # What is needed
 
