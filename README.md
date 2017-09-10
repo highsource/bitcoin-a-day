@@ -3,56 +3,62 @@
 This repository provides scripts to schedule buying €5 worth of bitcoin every day.
 This leverages the [Dollar-Cost Averaging (DCA)](http://www.investopedia.com/terms/d/dollarcostaveraging.asp) effect.
 
-WORK IN PROGRESS
-
-# Prerequisites
-
-* AWS account
-  * Installed AWS command-line utilities
-* Bitstamp account
-  * Enabled API access
-
-# How it works
-
-TBD
-
 # What it does
 
-* Take `bitstamp-properties.json` as input
-* Encrypt with AES 256 using randomly-generated password, write output to `bitstamp-properties.json.encrypted`
-* Create an S3 bucket and upload `bitstamp-properties.json.encrypted` to this bucket
-* Create a IAM policy to access `bitstamp-properties.json.encrypted` in the created S3 bucket
-* Create a IAM role for the lambda function
-* Attach the `bitstamp-properties.json.encrypted`-access and AWS lambda basic execution role policy to the create lambda function role
-* ...
-* TODO
-* ...
+The `setup.sh` script creates a scheduled task which buys certain value in Euros worth of bitcoin every day.
 
-# Usage
+Scheduled task is created using AWS and runs in the cloud so that it will run independent of whether users machine is online or not.
 
-* Clone this repository:
+# What is needed
+
+* `npm` and `zip` installed locally.
+* AWS account.
+* AWS command-line utilities (`aws`) installed locally.
+* Bitstamp account.
+* Enabled Bitstamp API access (you'll need customer id, API key and secret).
+
+# How to use it
+
+Clone this repository:
 
 ```
 git clone https://github.com/highsource/bitcoin-a-day.git
 ```
 
-* **Review the code.** I mean it. You are about to give this code access to your Bitstamp account - via API, but still.  
-Assume I am a malicious actor and wrote this code to steal from you or waste your money for fun. (I did not, but assume so.)
+**Review the code.** I mean it. You are about to give this code access to your Bitstamp account.  
+Assume I am a malicious actor and wrote this code to steal from you or waste your money for fun or profit. (I did not, but assume so.)
 Check the code, make sure you understand what it does.
 
-* Create the `bitstamp-properties.json` file with properties `customerId`, `key` and `secret`:
-
+Run:
 ```
-{
-	"customerId": "r......9",
-	"key": "d..............................F",
-	"secret": "0..............................4"
-}
+setup.sh "<customerId>" "<key>" "<secret>" <value>
 ```
 
-* Execute `setup.sh`.
+Parameters:
 
-* Check `output.txt`.
+* `<customerId>` - Bitstamp customer id
+* `<key>` - Bitstamp API key
+* `<secret>` - Bitstamp API secret
+* `<value>` - Value in Euros 
+
+Check `output.txt`.
+
+# What it does, exactly
+
+Essentially, the `setup.sh` scripts creates an AWS lambda function which is triggered by a CRON-scheduled CloudWatch event.
+Bitstamp account properties (customer id, API key and secret) are passed to the lambda function as environment variables.
+To protect this sensitive information, customer id, API key and secret are encrypted using AWS KMS and passed in encrypted form.
+They are not stored or logged in clear-text form anywhere.
+
+To be specific, the `setup.sh` does the following:
+
+* Generates a random id which will be used in names of created object later on to make those names unique.
+* Performs `npm install` and packages the lambda function in a ZIP file.
+* Creates an AWS IAM role for the lambda function, attaches the `AWSLambdaBasicExecuteRole` policy to that role.
+* Creates an AWS KMS encryption key (and an alias for it), adds a policy to allow the lambda function role to use it for decryption.
+* Encrypts Bitstamp customer id, API key and secret using the created AWS KMS encryption key.
+* Creates an AWS Lambda function, passing value to buy, encrypted customer id, key and secret as envrionment variables.
+* Creates a CloudWatch rule to trigger the lambda function every day at `12:00`
 
 # Credits
 
