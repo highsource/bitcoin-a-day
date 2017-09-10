@@ -54,7 +54,7 @@ Check `output.txt`.
 
 # What it does, exactly
 
-Essentially, the `setup.sh` scripts creates an AWS lambda function which is triggered by a CRON-scheduled CloudWatch event.
+Essentially, the `setup.sh` script creates an AWS lambda function which is triggered by a CRON-scheduled CloudWatch event to run every day.
 Bitstamp account properties (customer id, API key and secret) are passed to the lambda function as environment variables.
 To protect this sensitive information, customer id, API key and secret are encrypted using AWS KMS and passed in encrypted form.
 They are not stored or logged in clear-text form anywhere.
