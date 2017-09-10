@@ -21,10 +21,6 @@ if (isNaN(VALUE) || VALUE < MINIMUM_VALUE) {
 	throw new Error("Invalid value [" + value + "], must be a number not less than [" + MINIMUM_VALUE + "].");
 }
 
-function processEvent(event, context, callback) {
-    // TODO handle the event here
-}
-
 const kms = new AWS.KMS();
 
 const decrypt = function(encrypted) {
@@ -32,7 +28,7 @@ const decrypt = function(encrypted) {
 		kms
 			.decrypt({ CiphertextBlob: new Buffer(encrypted, 'base64') })
 			.promise()
-			.then(data => {console.log('Decrypted:', data); resolve(data.Plaintext.toString('ascii'));})
+			.then(data => resolve(data.Plaintext.toString('ascii')))
 			.catch(reject)
 	});
 };
